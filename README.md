@@ -24,6 +24,57 @@ NATS is a simple, secure, and high-performance messaging system for cloud native
 
 ## NATS architecture
 
+### Core Components
+
+**NATS Server**: Lightweight message broker that routes messages between clients
+- **Single Binary**: ~15MB executable with zero dependencies
+- **Clustering**: Multiple servers form a mesh network for high availability
+- **Subject-Based Routing**: Messages routed by hierarchical subjects (e.g., `orders.new.usa`)
+
+**NATS Clients**: Libraries that connect applications to NATS servers
+- **Connection Management**: Automatic reconnection and failover
+- **Protocol**: Text-based protocol over TCP (binary payload support)
+- **Authentication**: Token, username/password, TLS certificates, NKeys
+
+### Messaging Patterns
+
+1. **Publish-Subscribe**: One-to-many message distribution
+   ```
+   Publisher → Subject → Multiple Subscribers
+   ```
+
+2. **Request-Reply**: Synchronous communication pattern
+   ```
+   Requester → Subject → Responder → Reply Subject → Requester
+   ```
+
+3. **Queue Groups**: Load balancing across multiple consumers
+   ```
+   Publisher → Subject → Queue Group (only one member receives)
+   ```
+
+### Subject Hierarchy
+- **Wildcards**: `*` (single token), `>` (multiple tokens)
+- **Examples**: 
+  - `orders.*` matches `orders.new`, `orders.cancel`
+  - `orders.>` matches `orders.new.usa`, `orders.cancel.europe`
+
+### NATS Core vs JetStream
+
+| Feature | NATS Core | JetStream |
+|---------|-----------|----------|
+| **Delivery** | At-most-once | At-least-once, exactly-once |
+| **Persistence** | In-memory only | Durable storage |
+| **Replay** | No | Yes, from any point |
+| **Acknowledgments** | No | Yes |
+| **Ordering** | No guarantees | Per-stream ordering |
+
+### Clustering Architecture
+- **Full Mesh**: Every server connects to every other server
+- **Gossip Protocol**: Cluster state propagation
+- **Split-Brain Protection**: Requires majority for writes
+- **Auto-Discovery**: Servers automatically find each other
+
 ### Best Use Cases
 1. **Microservices Communication**: Service-to-service messaging
 2. **IoT Data Ingestion**: High-volume sensor data collection
